@@ -1,0 +1,20 @@
+# fly.toml app configuration file generated for teamboard-backend
+
+app = "teamboard-backend"
+primary_region = "bos"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 5005
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
