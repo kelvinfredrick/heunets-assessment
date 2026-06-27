@@ -6,7 +6,7 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const API_BASE = 'http://localhost:5005/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -27,9 +27,8 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
-      const API_BASE = 'http://localhost:5005/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
       const res = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
