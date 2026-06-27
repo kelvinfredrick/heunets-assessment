@@ -1,20 +1,23 @@
-# fly.toml app configuration file generated for teamboard-backend
+# fly.toml app configuration file generated for heunets-assessment-qs5hdq on 2026-06-27T14:21:23Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "teamboard-backend"
-primary_region = "bos"
+app = 'heunets-assessment-qs5hdq'
+primary_region = 'ewr'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [http_service]
-  internal_port = 5005
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = "suspend"
+  auto_stop_machines = 'suspend'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
 
 [[vm]]
-  cpu_kind = "shared"
+  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 512
