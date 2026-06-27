@@ -469,6 +469,15 @@ ul, ol {
     width: 100% !important;
     border-top: 1px solid var(--outline-variant);
   }
+
+  /* Auth Pages Mobile Layout */
+  .auth-form-side {
+    width: 100% !important;
+    padding: var(--space-md) !important;
+  }
+  .auth-brand-side {
+    display: none !important;
+  }
 }
 
 .task-detail-modal-container {
@@ -480,4 +489,30 @@ ul, ol {
   max-height: 800px;
 }
 
+/* Auth Pages Base Layout */
+.auth-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
 
+.auth-form-side {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-lg);
+  background-color: var(--surface);
+  position: relative;
+}
+
+.auth-brand-side {
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

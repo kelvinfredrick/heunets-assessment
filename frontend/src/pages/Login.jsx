@@ -22,20 +22,9 @@ export default function Login() {
   };
 
   return (
-    <main style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden' }}>
+    <main className="auth-layout">
       {/* LEFT SIDE: Auth Form */}
-      <section
-        style={{
-          width: '50%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 'var(--space-lg)',
-          backgroundColor: 'var(--surface)',
-          position: 'relative',
-        }}
-      >
+      <section className="auth-form-side">
         {/* Mobile Branding (hidden on desktop) */}
         <div style={{ width: '100%', maxWidth: 440 }}>
           {/* Header */}
@@ -329,17 +318,7 @@ export default function Login() {
       </section>
 
       {/* RIGHT SIDE: Visual Branding */}
-      <section
-        className="gradient-mesh"
-        style={{
-          width: '50%',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <section className="gradient-mesh auth-brand-side">
         {/* Decorative Blurs */}
         <div
           className="animate-pulse-soft"
