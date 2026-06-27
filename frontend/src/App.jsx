@@ -8,6 +8,7 @@ import ProjectView from './pages/ProjectView';
 import Tasks from './pages/Tasks';
 import Calendar from './pages/Calendar';
 import Reports from './pages/Reports';
+import NotFound from './pages/NotFound';
 
 function ProtectedRoute({ children }) {
   const { user } = useSelector((state) => state.auth);
@@ -47,16 +48,10 @@ function MainRoutes() {
         <Route path="tasks" element={<Tasks />} />
         <Route path="calendar" element={<Calendar />} />
         <Route path="reports" element={<Reports />} />
-        <Route
-          path="*"
-          element={
-            <div style={{ padding: 40, textAlign: 'center' }}>
-              <h2>Page Not Found</h2>
-              <p>We couldn't find the page you're looking for.</p>
-            </div>
-          }
-        />
       </Route>
+
+      {/* Catch-all 404 — outside protected routes so it works for everyone */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
