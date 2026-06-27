@@ -1,20 +1,26 @@
-primary_region = "ewr"
+# fly.toml app configuration file generated for heunets-assessment-kqxhdg on 2026-06-27T15:00:32Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'heunets-assessment-kqxhdg'
+primary_region = 'ams'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
+
   [build.args]
-    # We pass the backend production API URL so Vite bakes it into the production build
-    VITE_API_URL = "https://heunets-assessment-qs5hdq.fly.dev/api"
+    VITE_API_URL = 'https://heunets-assessment-qs5hdq.fly.dev/api'
 
 [http_service]
-  internal_port = 80
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = "suspend"
+  auto_stop_machines = 'suspend'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
 
 [[vm]]
-  cpu_kind = "shared"
+  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 256
