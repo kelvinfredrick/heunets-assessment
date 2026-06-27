@@ -23,9 +23,9 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT || 5000;
-  await app.listen(port);
-  console.log(`TeamBoard Backend Server successfully running on http://localhost:${port}/api`);
+  const port = process.env.PORT || 8080;
+  await app.listen(port, '0.0.0.0');
+  console.log(`TeamBoard Backend Server successfully running on http://0.0.0.0:${port}/api`);
 }
 bootstrap();
 
