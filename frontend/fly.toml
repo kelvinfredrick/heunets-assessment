@@ -13,7 +13,7 @@ primary_region = 'ams'
     VITE_API_URL = 'https://heunets-assessment-qs5hdq.fly.dev/api'
 
 [http_service]
-  internal_port = 8080
+  internal_port = 80
   force_https = true
   auto_stop_machines = 'suspend'
   auto_start_machines = true
