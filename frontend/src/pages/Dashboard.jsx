@@ -206,6 +206,7 @@ export default function Dashboard() {
       {/* Project Overview Header */}
       <div>
         <div
+          className="header-actions-wrap"
           style={{
             display: 'flex',
             alignItems: 'center',

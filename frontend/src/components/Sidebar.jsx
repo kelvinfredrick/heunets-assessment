@@ -13,7 +13,7 @@ const navItems = [
   { icon: 'bar_chart', label: 'Reports', path: '/reports' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const { user } = useSelector((state) => state.auth);
   const location = useLocation();
   const navigate = useNavigate();
@@ -33,6 +33,7 @@ export default function Sidebar() {
       const newProj = await dispatch(createProject(projectData)).unwrap();
       setIsModalOpen(false);
       navigate(`/projects/${newProj._id}`);
+      if (onClose) onClose(); // Close drawer on mobile after redirect
     } catch (err) {
       alert(err.message || 'Failed to create project');
     }
@@ -41,6 +42,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate('/login');
+    if (onClose) onClose();
   };
 
   const isActive = (path) => {
@@ -53,19 +55,14 @@ export default function Sidebar() {
   return (
     <>
       <aside
+        className={`sidebar-nav ${isOpen ? 'open' : ''}`}
         style={{
-          width: 'var(--sidebar-width)',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
           backgroundColor: 'var(--primary)',
           borderRight: '1px solid var(--outline-variant)',
           display: 'flex',
           flexDirection: 'column',
           paddingTop: 'var(--space-lg)',
           paddingBottom: 'var(--space-lg)',
-          zIndex: 50,
           overflowY: 'auto',
         }}
       >
@@ -117,6 +114,7 @@ export default function Sidebar() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

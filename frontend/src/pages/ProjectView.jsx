@@ -130,6 +130,7 @@ export default function ProjectView() {
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 112px)', animation: 'fade-in 0.4s ease-out' }}>
       {/* Project Header */}
       <div
+        className="header-actions-wrap"
         style={{
           display: 'flex',
           justifyContent: 'space-between',

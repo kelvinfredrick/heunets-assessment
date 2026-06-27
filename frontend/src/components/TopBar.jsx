@@ -1,16 +1,16 @@
 import { useSelector } from 'react-redux';
 
-export default function TopBar() {
+export default function TopBar({ onMenuClick }) {
   const { user } = useSelector((state) => state.auth);
 
   return (
     <header
+      className="top-bar"
       style={{
         height: 64,
         position: 'fixed',
         top: 0,
         right: 0,
-        left: 'var(--sidebar-width)',
         backgroundColor: 'var(--surface)',
         borderBottom: '1px solid var(--outline-variant)',
         display: 'flex',
@@ -20,8 +20,11 @@ export default function TopBar() {
         zIndex: 40,
       }}
     >
-      {/* Search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)', flex: 1 }}>
+      {/* Search & Menu */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flex: 1 }}>
+        <button className="mobile-menu-btn" onClick={onMenuClick}>
+          <span className="material-symbols-outlined">menu</span>
+        </button>
         <div style={{ position: 'relative', width: '100%', maxWidth: 448 }}>
           <span
             className="material-symbols-outlined"

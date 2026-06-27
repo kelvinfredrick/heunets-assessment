@@ -359,3 +359,80 @@ ul, ol {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ===== Responsive Layout Media Queries ===== */
+.sidebar-nav {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+}
+
+.top-bar {
+  left: var(--sidebar-width);
+}
+
+.mobile-menu-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .sidebar-nav {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar-nav.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(9, 20, 38, 0.3);
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .top-bar {
+    left: 0 !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: 50%;
+    margin-right: var(--space-sm);
+  }
+
+  .mobile-menu-btn:active {
+    background-color: var(--surface-container-high);
+  }
+
+  /* Force Bento grids to stack vertically */
+  .bento-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-md) !important;
+  }
+
+  .bento-grid > div {
+    grid-column: span 12 !important;
+  }
+
+  /* Wrap page header actions on mobile screens */
+  .header-actions-wrap {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--space-sm) !important;
+  }
+}
+
