@@ -60,12 +60,9 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
     >
       {/* Modal Container */}
       <div
-        className="animate-fade-in-scale"
+        className="animate-fade-in-scale task-detail-modal-container"
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: '100%',
-          maxWidth: 1024,
-          height: 800,
           backgroundColor: 'var(--surface-container-lowest)',
           borderRadius: 'var(--radius-xl)',
           boxShadow: 'var(--shadow-xl)',

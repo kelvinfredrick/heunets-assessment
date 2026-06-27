@@ -159,7 +159,7 @@ export default function ProjectView() {
           </h2>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+        <div className="header-actions-row" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
           {/* Team Avatars */}
           <div style={{ display: 'flex', gap: -8 }}>
             {[

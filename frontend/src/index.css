@@ -434,5 +434,50 @@ ul, ol {
     align-items: stretch !important;
     gap: var(--space-sm) !important;
   }
+
+  .header-actions-row {
+    flex-wrap: wrap !important;
+    gap: var(--space-sm) !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .header-actions-row > div {
+    flex: 1 1 120px !important;
+  }
+
+  .header-actions-row > button {
+    flex: 1 1 100% !important;
+  }
+
+  /* Make Task Details Modal responsive on mobile viewports */
+  .task-detail-modal-container {
+    flex-direction: column !important;
+    height: 95vh !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+  }
+
+  .task-detail-modal-container > div,
+  .task-detail-modal-container > aside {
+    overflow-y: visible !important;
+    height: auto !important;
+    border-right: none !important;
+  }
+
+  .task-detail-modal-container > aside {
+    width: 100% !important;
+    border-top: 1px solid var(--outline-variant);
+  }
 }
+
+.task-detail-modal-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 1024px;
+  height: 90vh;
+  max-height: 800px;
+}
+
 
