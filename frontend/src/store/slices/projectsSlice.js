@@ -31,7 +31,9 @@ export const createProject = createAsyncThunk(
 const initialState = {
   list: [],
   loading: false,
+  creating: false,
   error: null,
+  createError: null,
 };
 
 const projectsSlice = createSlice({
@@ -40,6 +42,7 @@ const projectsSlice = createSlice({
   reducers: {
     clearProjectsError: (state) => {
       state.error = null;
+      state.createError = null;
     },
   },
   extraReducers: (builder) => {
@@ -58,8 +61,17 @@ const projectsSlice = createSlice({
         state.error = action.payload;
       })
       // Create Project
+      .addCase(createProject.pending, (state) => {
+        state.creating = true;
+        state.createError = null;
+      })
       .addCase(createProject.fulfilled, (state, action) => {
+        state.creating = false;
         state.list.push(action.payload);
+      })
+      .addCase(createProject.rejected, (state, action) => {
+        state.creating = false;
+        state.createError = action.payload;
       });
   },
 });

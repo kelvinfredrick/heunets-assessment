@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
+export default function CreateTaskModal({ onClose, onCreate, columnStatus, isCreating, error }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
@@ -8,15 +8,15 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
   // Handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isCreating) onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isCreating]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || isCreating) return;
     onCreate({ title, description, priority, status: columnStatus });
   };
 
@@ -32,7 +32,9 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
         justifyContent: 'center',
         padding: 'var(--space-lg)',
       }}
-      onClick={onClose}
+      onClick={() => {
+        if (!isCreating) onClose();
+      }}
     >
       <div
         className="animate-fade-in-scale"
@@ -64,14 +66,21 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
           </h3>
           <button
             onClick={onClose}
+            disabled={isCreating}
             style={{
               padding: 'var(--space-xs)',
               borderRadius: '50%',
               color: 'var(--on-surface-variant)',
               transition: 'background-color 0.15s ease',
+              opacity: isCreating ? 0.5 : 1,
+              cursor: isCreating ? 'not-allowed' : 'pointer',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            onMouseEnter={(e) => {
+              if (!isCreating) e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+            }}
+            onMouseLeave={(e) => {
+              if (!isCreating) e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -79,6 +88,22 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
 
         {/* Body / Form */}
         <form onSubmit={handleSubmit} style={{ padding: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+          {error && (
+            <div
+              style={{
+                backgroundColor: 'var(--error-container)',
+                color: 'var(--on-error-container)',
+                padding: 'var(--space-sm) var(--space-md)',
+                borderRadius: 'var(--radius-lg)',
+                fontSize: 13,
+                fontWeight: 500,
+                border: '1px solid rgba(186, 26, 26, 0.2)',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
             <label htmlFor="task-title" className="text-label-md" style={{ color: 'var(--on-surface)', fontWeight: 600 }}>
               Task title
@@ -87,6 +112,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
               id="task-title"
               type="text"
               required
+              disabled={isCreating}
               placeholder="e.g. Design checkout interface"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -98,6 +124,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
                 borderRadius: 'var(--radius-lg)',
                 fontSize: 14,
                 color: 'var(--on-surface)',
+                opacity: isCreating ? 0.7 : 1,
               }}
               onFocus={(e) => {
                 e.target.style.boxShadow = '0 0 0 2px var(--secondary-container)';
@@ -116,6 +143,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
             </label>
             <textarea
               id="task-desc"
+              disabled={isCreating}
               placeholder="Brief details about the requirements..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -129,6 +157,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
                 fontSize: 14,
                 color: 'var(--on-surface)',
                 resize: 'none',
+                opacity: isCreating ? 0.7 : 1,
               }}
               onFocus={(e) => {
                 e.target.style.boxShadow = '0 0 0 2px var(--secondary-container)';
@@ -148,6 +177,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
             <div style={{ position: 'relative' }}>
               <select
                 id="task-priority"
+                disabled={isCreating}
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 style={{
@@ -159,7 +189,8 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
                   fontSize: 14,
                   color: 'var(--on-surface)',
                   appearance: 'none',
-                  cursor: 'pointer',
+                  cursor: isCreating ? 'not-allowed' : 'pointer',
+                  opacity: isCreating ? 0.7 : 1,
                 }}
               >
                 <option value="Low">Low</option>
@@ -196,6 +227,7 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
             <button
               type="button"
               onClick={onClose}
+              disabled={isCreating}
               style={{
                 padding: 'var(--space-sm) var(--space-lg)',
                 border: '1px solid var(--outline-variant)',
@@ -204,14 +236,21 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
                 fontSize: 14,
                 color: 'var(--on-surface-variant)',
                 transition: 'background-color 0.15s ease',
+                opacity: isCreating ? 0.5 : 1,
+                cursor: isCreating ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container-high)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              onMouseEnter={(e) => {
+                if (!isCreating) e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isCreating) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isCreating}
               style={{
                 padding: 'var(--space-sm) var(--space-lg)',
                 backgroundColor: 'var(--primary)',
@@ -221,11 +260,24 @@ export default function CreateTaskModal({ onClose, onCreate, columnStatus }) {
                 fontSize: 14,
                 boxShadow: '0 4px 10px rgba(9, 20, 38, 0.2)',
                 transition: 'transform 0.1s ease',
+                opacity: isCreating ? 0.7 : 1,
+                cursor: isCreating ? 'not-allowed' : 'pointer',
               }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
-              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              onMouseDown={(e) => {
+                if (!isCreating) e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                if (!isCreating) e.currentTarget.style.transform = 'scale(1)';
+              }}
             >
-              Create Task
+              {isCreating ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                  <span className="spinner"></span>
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                'Create Task'
+              )}
             </button>
           </div>
         </form>

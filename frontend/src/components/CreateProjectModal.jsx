@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 
-export default function CreateProjectModal({ onClose, onCreate }) {
+export default function CreateProjectModal({ onClose, onCreate, isCreating, error }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
   // Handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isCreating) onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isCreating]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || isCreating) return;
     onCreate({ name, description });
   };
 
@@ -31,7 +31,9 @@ export default function CreateProjectModal({ onClose, onCreate }) {
         justifyContent: 'center',
         padding: 'var(--space-lg)',
       }}
-      onClick={onClose}
+      onClick={() => {
+        if (!isCreating) onClose();
+      }}
     >
       <div
         className="animate-fade-in-scale"
@@ -63,14 +65,21 @@ export default function CreateProjectModal({ onClose, onCreate }) {
           </h3>
           <button
             onClick={onClose}
+            disabled={isCreating}
             style={{
               padding: 'var(--space-xs)',
               borderRadius: '50%',
               color: 'var(--on-surface-variant)',
               transition: 'background-color 0.15s ease',
+              opacity: isCreating ? 0.5 : 1,
+              cursor: isCreating ? 'not-allowed' : 'pointer',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            onMouseEnter={(e) => {
+              if (!isCreating) e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+            }}
+            onMouseLeave={(e) => {
+              if (!isCreating) e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -78,6 +87,22 @@ export default function CreateProjectModal({ onClose, onCreate }) {
 
         {/* Body / Form */}
         <form onSubmit={handleSubmit} style={{ padding: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+          {error && (
+            <div
+              style={{
+                backgroundColor: 'var(--error-container)',
+                color: 'var(--on-error-container)',
+                padding: 'var(--space-sm) var(--space-md)',
+                borderRadius: 'var(--radius-lg)',
+                fontSize: 13,
+                fontWeight: 500,
+                border: '1px solid rgba(186, 26, 26, 0.2)',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
             <label htmlFor="proj-name" className="text-label-md" style={{ color: 'var(--on-surface)', fontWeight: 600 }}>
               Project name
@@ -86,6 +111,7 @@ export default function CreateProjectModal({ onClose, onCreate }) {
               id="proj-name"
               type="text"
               required
+              disabled={isCreating}
               placeholder="e.g. Website Redesign 2024"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -97,6 +123,7 @@ export default function CreateProjectModal({ onClose, onCreate }) {
                 borderRadius: 'var(--radius-lg)',
                 fontSize: 14,
                 color: 'var(--on-surface)',
+                opacity: isCreating ? 0.7 : 1,
               }}
               onFocus={(e) => {
                 e.target.style.boxShadow = '0 0 0 2px var(--secondary-container)';
@@ -115,6 +142,7 @@ export default function CreateProjectModal({ onClose, onCreate }) {
             </label>
             <textarea
               id="proj-desc"
+              disabled={isCreating}
               placeholder="Describe the goals and scope of the project..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -128,6 +156,7 @@ export default function CreateProjectModal({ onClose, onCreate }) {
                 fontSize: 14,
                 color: 'var(--on-surface)',
                 resize: 'none',
+                opacity: isCreating ? 0.7 : 1,
               }}
               onFocus={(e) => {
                 e.target.style.boxShadow = '0 0 0 2px var(--secondary-container)';
@@ -154,6 +183,7 @@ export default function CreateProjectModal({ onClose, onCreate }) {
             <button
               type="button"
               onClick={onClose}
+              disabled={isCreating}
               style={{
                 padding: 'var(--space-sm) var(--space-lg)',
                 border: '1px solid var(--outline-variant)',
@@ -162,14 +192,21 @@ export default function CreateProjectModal({ onClose, onCreate }) {
                 fontSize: 14,
                 color: 'var(--on-surface-variant)',
                 transition: 'background-color 0.15s ease',
+                opacity: isCreating ? 0.5 : 1,
+                cursor: isCreating ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container-high)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              onMouseEnter={(e) => {
+                if (!isCreating) e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isCreating) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isCreating}
               style={{
                 padding: 'var(--space-sm) var(--space-lg)',
                 backgroundColor: 'var(--primary)',
@@ -179,11 +216,24 @@ export default function CreateProjectModal({ onClose, onCreate }) {
                 fontSize: 14,
                 boxShadow: '0 4px 10px rgba(9, 20, 38, 0.2)',
                 transition: 'transform 0.1s ease',
+                opacity: isCreating ? 0.7 : 1,
+                cursor: isCreating ? 'not-allowed' : 'pointer',
               }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
-              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              onMouseDown={(e) => {
+                if (!isCreating) e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                if (!isCreating) e.currentTarget.style.transform = 'scale(1)';
+              }}
             >
-              Create Project
+              {isCreating ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                  <span className="spinner"></span>
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                'Create Project'
+              )}
             </button>
           </div>
         </form>

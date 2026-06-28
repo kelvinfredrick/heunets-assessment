@@ -253,7 +253,14 @@ export default function Login() {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <span className="spinner"></span>
+                    <span>Signing in...</span>
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
               </button>
 
               {/* Divider */}

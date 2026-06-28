@@ -279,7 +279,14 @@ export default function Signup() {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                {isLoading ? 'Creating account...' : 'Create Account'}
+                {isLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <span className="spinner"></span>
+                    <span>Creating account...</span>
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
               </button>
 
               {/* Divider */}

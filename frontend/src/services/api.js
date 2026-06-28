@@ -11,6 +11,7 @@ async function request(url, method, token, body = null) {
   const options = {
     method,
     headers,
+    credentials: 'include',
   };
   if (body) {
     options.body = JSON.stringify(body);
@@ -19,7 +20,6 @@ async function request(url, method, token, body = null) {
   const res = await fetch(`${API_BASE}${url}`, options);
   if (res.status === 401) {
     localStorage.removeItem('teamboard_user');
-    localStorage.removeItem('teamboard_token');
     window.location.href = '/login';
     throw new Error('Session expired');
   }

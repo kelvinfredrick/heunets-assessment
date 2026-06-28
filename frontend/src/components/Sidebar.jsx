@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { createProject } from '../store/slices/projectsSlice';
-import { logoutUser } from '../store/slices/authSlice';
+import { createProject, clearProjectsError } from '../store/slices/projectsSlice';
+import { logoutUserThunk } from '../store/slices/authSlice';
 import CreateProjectModal from './CreateProjectModal';
 
 const navItems = [
@@ -15,17 +15,20 @@ const navItems = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user } = useSelector((state) => state.auth);
+  const { creating: isCreatingProject, createError } = useSelector((state) => state.projects);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
+    dispatch(clearProjectsError());
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    dispatch(clearProjectsError());
   };
 
   const handleCreateProject = async (projectData) => {
@@ -35,12 +38,12 @@ export default function Sidebar({ isOpen, onClose }) {
       navigate(`/projects/${newProj._id}`);
       if (onClose) onClose(); // Close drawer on mobile after redirect
     } catch (err) {
-      alert(err.message || 'Failed to create project');
+      console.error('Failed to create project:', err);
     }
   };
 
-  const handleLogout = () => {
-    dispatch(logoutUser());
+  const handleLogout = async () => {
+    await dispatch(logoutUserThunk());
     navigate('/login');
     if (onClose) onClose();
   };
@@ -282,6 +285,8 @@ export default function Sidebar({ isOpen, onClose }) {
         <CreateProjectModal
           onClose={handleCloseModal}
           onCreate={handleCreateProject}
+          isCreating={isCreatingProject}
+          error={createError}
         />
       )}
     </>

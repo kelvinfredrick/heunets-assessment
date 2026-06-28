@@ -132,7 +132,13 @@ const initialState = {
   items: [],
   project: null,
   loading: false,
+  creatingTask: false,
+  updatingTask: false,
+  deletingTask: false,
   error: null,
+  createError: null,
+  updateError: null,
+  deleteError: null,
 };
 
 const tasksSlice = createSlice({
@@ -141,6 +147,9 @@ const tasksSlice = createSlice({
   reducers: {
     clearTasksError: (state) => {
       state.error = null;
+      state.createError = null;
+      state.updateError = null;
+      state.deleteError = null;
     },
   },
   extraReducers: (builder) => {
@@ -158,6 +167,42 @@ const tasksSlice = createSlice({
       .addCase(fetchProjectAndTasks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Create Task
+      .addCase(createTaskThunk.pending, (state) => {
+        state.creatingTask = true;
+        state.createError = null;
+      })
+      .addCase(createTaskThunk.fulfilled, (state) => {
+        state.creatingTask = false;
+      })
+      .addCase(createTaskThunk.rejected, (state, action) => {
+        state.creatingTask = false;
+        state.createError = action.payload;
+      })
+      // Update Task
+      .addCase(updateTaskThunk.pending, (state) => {
+        state.updatingTask = true;
+        state.updateError = null;
+      })
+      .addCase(updateTaskThunk.fulfilled, (state) => {
+        state.updatingTask = false;
+      })
+      .addCase(updateTaskThunk.rejected, (state, action) => {
+        state.updatingTask = false;
+        state.updateError = action.payload;
+      })
+      // Delete Task
+      .addCase(deleteTaskThunk.pending, (state) => {
+        state.deletingTask = true;
+        state.deleteError = null;
+      })
+      .addCase(deleteTaskThunk.fulfilled, (state) => {
+        state.deletingTask = false;
+      })
+      .addCase(deleteTaskThunk.rejected, (state, action) => {
+        state.deletingTask = false;
+        state.deleteError = action.payload;
       });
   },
 });

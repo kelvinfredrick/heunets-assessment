@@ -1,12 +1,25 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import StatusChip from './StatusChip';
 
-export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
-  const [status, setStatus] = useState('In Progress');
-  const [priority, setPriority] = useState('High');
-  const [description, setDescription] = useState(
-    'Implement a secure, scalable authentication system using JWT and OAuth2. The module should support:\n\n• Email/Password registration and login with Argon2 hashing\n• Social login integration (Google & GitHub)\n• Multi-factor authentication (TOTP)\n• Refresh token rotation and secure cookie handling\n\nArchitecture must follow the existing hexagonal patterns established in the /services/identity directory.'
-  );
+export default function TaskDetailModal({
+  taskId,
+  onClose,
+  onSave,
+  onDelete,
+  isSaving,
+  isDeleting,
+  saveError,
+  deleteError
+}) {
+  const task = useSelector((state) => state.tasks.items.find((t) => t._id === taskId));
+  const { project } = useSelector((state) => state.tasks);
+
+  const [status, setStatus] = useState('To Do');
+  const [priority, setPriority] = useState('Medium');
+  const [description, setDescription] = useState('');
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
+
   const [comments, setComments] = useState([
     {
       id: '1',
@@ -19,14 +32,23 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
   ]);
   const [newComment, setNewComment] = useState('');
 
+  // Sync state with task when it loads or changes
+  useEffect(() => {
+    if (task) {
+      setStatus(task.status || 'To Do');
+      setPriority(task.priority || 'Medium');
+      setDescription(task.description || '');
+    }
+  }, [task]);
+
   // Handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isSaving && !isDeleting) onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isSaving, isDeleting]);
 
   const handlePostComment = () => {
     if (!newComment.trim()) return;
@@ -56,7 +78,9 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
         justifyContent: 'center',
         padding: 'var(--space-lg)',
       }}
-      onClick={onClose}
+      onClick={() => {
+        if (!isSaving && !isDeleting) onClose();
+      }}
     >
       {/* Modal Container */}
       <div
@@ -108,24 +132,31 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>folder_open</span>
-                <span>Platform Redesign</span>
+                <span>{project?.name || 'Project'}</span>
                 <span>/</span>
-                <span>TASK-1024</span>
+                <span>Task Board</span>
               </div>
               <h2 className="text-headline-lg" style={{ color: 'var(--primary)', fontWeight: 600 }}>
-                Develop User Auth Module
+                {task?.title || 'Loading task...'}
               </h2>
             </div>
             <button
               onClick={onClose}
+              disabled={isSaving || isDeleting}
               style={{
                 padding: 'var(--space-xs)',
                 borderRadius: '50%',
                 color: 'var(--on-surface-variant)',
                 transition: 'background-color 0.15s ease',
+                opacity: isSaving || isDeleting ? 0.5 : 1,
+                cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              onMouseEnter={(e) => {
+                if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -133,6 +164,23 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
 
           {/* Details Body */}
           <div style={{ padding: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
+            {/* Error alerts if save/delete failed */}
+            {(saveError || deleteError) && (
+              <div
+                style={{
+                  backgroundColor: 'var(--error-container)',
+                  color: 'var(--on-error-container)',
+                  padding: 'var(--space-sm) var(--space-md)',
+                  borderRadius: 'var(--radius-lg)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  border: '1px solid rgba(186, 26, 26, 0.2)',
+                }}
+              >
+                {saveError || deleteError}
+              </div>
+            )}
+
             {/* Metadata Grid */}
             <div
               style={{
@@ -149,6 +197,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                 <div style={{ position: 'relative' }}>
                   <select
                     value={status}
+                    disabled={isSaving || isDeleting}
                     onChange={(e) => setStatus(e.target.value)}
                     style={{
                       width: '100%',
@@ -160,13 +209,13 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                       fontWeight: 500,
                       color: 'var(--secondary)',
                       appearance: 'none',
-                      cursor: 'pointer',
+                      cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
+                      opacity: isSaving || isDeleting ? 0.7 : 1,
                     }}
                   >
-                    <option>To Do</option>
-                    <option>In Progress</option>
-                    <option>In Review</option>
-                    <option>Done</option>
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
                   </select>
                   <span
                     className="material-symbols-outlined"
@@ -190,22 +239,42 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                 <label className="text-label-md" style={{ color: 'var(--on-surface-variant)', display: 'block', marginBottom: 'var(--space-xs)' }}>
                   Priority
                 </label>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--space-sm)',
-                    backgroundColor: 'var(--error-container)',
-                    border: '1px solid rgba(186, 26, 26, 0.2)',
-                    padding: 'var(--space-sm) var(--space-md)',
-                    borderRadius: 'var(--radius-lg)',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ color: 'var(--error)', fontSize: 18, fontVariationSettings: "'FILL' 1" }}>
-                    flag
-                  </span>
-                  <span className="text-label-md" style={{ color: 'var(--error)', fontWeight: 700 }}>
-                    {priority}
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value={priority}
+                    disabled={isSaving || isDeleting}
+                    onChange={(e) => setPriority(e.target.value)}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'rgba(80, 95, 118, 0.1)',
+                      border: '1px solid var(--outline-variant)',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: 'var(--space-sm) var(--space-md)',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: 'var(--secondary)',
+                      appearance: 'none',
+                      cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
+                      opacity: isSaving || isDeleting ? 0.7 : 1,
+                    }}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      pointerEvents: 'none',
+                      color: 'var(--on-surface-variant)',
+                      fontSize: 18,
+                    }}
+                  >
+                    expand_more
                   </span>
                 </div>
               </div>
@@ -269,26 +338,61 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
                 <h3 className="text-headline-md" style={{ color: 'var(--primary)' }}>Description</h3>
                 <button
+                  type="button"
+                  onClick={() => setIsEditingDesc(!isEditingDesc)}
+                  disabled={isSaving || isDeleting}
                   className="text-label-sm"
-                  style={{ color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}
+                  style={{
+                    color: 'var(--secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-xs)',
+                    cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
+                    opacity: isSaving || isDeleting ? 0.5 : 1,
+                  }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>edit</span> Edit
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                    {isEditingDesc ? 'visibility' : 'edit'}
+                  </span>
+                  <span>{isEditingDesc ? 'Preview' : 'Edit'}</span>
                 </button>
               </div>
-              <div
-                className="text-body-md"
-                style={{
-                  color: 'var(--on-surface-variant)',
-                  backgroundColor: 'var(--surface-container-low)',
-                  padding: 'var(--space-lg)',
-                  borderRadius: 'var(--radius-xl)',
-                  border: '1px solid rgba(197, 198, 205, 0.3)',
-                  lineHeight: '1.6',
-                  whiteSpace: 'pre-wrap',
-                }}
-              >
-                {description}
-              </div>
+              {isEditingDesc ? (
+                <textarea
+                  value={description}
+                  disabled={isSaving || isDeleting}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the goals and scope of the task..."
+                  style={{
+                    width: '100%',
+                    minHeight: 120,
+                    padding: 'var(--space-md)',
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--outline-variant)',
+                    borderRadius: 'var(--radius-lg)',
+                    fontSize: 14,
+                    color: 'var(--on-surface)',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              ) : (
+                <div
+                  className="text-body-md"
+                  style={{
+                    color: 'var(--on-surface-variant)',
+                    backgroundColor: 'var(--surface-container-low)',
+                    padding: 'var(--space-lg)',
+                    borderRadius: 'var(--radius-xl)',
+                    border: '1px solid rgba(197, 198, 205, 0.3)',
+                    lineHeight: '1.6',
+                    whiteSpace: 'pre-wrap',
+                    minHeight: 80,
+                  }}
+                >
+                  {description || <span style={{ fontStyle: 'italic', opacity: 0.6 }}>No description provided. Click Edit to add details.</span>}
+                </div>
+              )}
             </section>
 
             {/* Comments */}
@@ -316,7 +420,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                       {comment.avatar ? (
                         <img src={comment.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyText: 'center', fontSize: 12, fontWeight: 700 }}>
+                        <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>
                           {comment.author.charAt(0)}
                         </div>
                       )}
@@ -360,6 +464,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                   <div style={{ flex: 1, position: 'relative' }}>
                     <textarea
                       placeholder="Write a comment..."
+                      disabled={isSaving || isDeleting}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       style={{
@@ -378,11 +483,12 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                       onBlur={(e) => (e.target.style.borderColor = 'var(--outline-variant)')}
                     />
                     <div style={{ position: 'absolute', bottom: 8, right: 8, display: 'flex', gap: 'var(--space-sm)' }}>
-                      <button style={{ padding: 4, color: 'var(--on-surface-variant)' }}>
+                      <button disabled={isSaving || isDeleting} style={{ padding: 4, color: 'var(--on-surface-variant)', cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer' }}>
                         <span className="material-symbols-outlined" style={{ fontSize: 20 }}>attach_file</span>
                       </button>
                       <button
                         onClick={handlePostComment}
+                        disabled={isSaving || isDeleting}
                         style={{
                           backgroundColor: 'var(--primary)',
                           color: 'var(--on-primary)',
@@ -390,6 +496,8 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                           borderRadius: 'var(--radius)',
                           fontSize: 12,
                           fontWeight: 700,
+                          cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
+                          opacity: isSaving || isDeleting ? 0.7 : 1,
                         }}
                       >
                         Post
@@ -418,6 +526,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
           >
             <button
               onClick={() => onDelete && onDelete(taskId)}
+              disabled={isSaving || isDeleting}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -428,16 +537,32 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                 padding: 'var(--space-sm) var(--space-md)',
                 borderRadius: 'var(--radius-lg)',
                 transition: 'background-color 0.15s ease',
+                opacity: isSaving || isDeleting ? 0.5 : 1,
+                cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--error-container)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              onMouseEnter={(e) => {
+                if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'var(--error-container)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
-              Delete Task
+              {isDeleting ? (
+                <>
+                  <span className="spinner" style={{ color: 'var(--error)' }}></span>
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
+                  <span>Delete Task</span>
+                </>
+              )}
             </button>
             <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
               <button
                 onClick={onClose}
+                disabled={isSaving || isDeleting}
                 style={{
                   padding: 'var(--space-sm) var(--space-lg)',
                   border: '1px solid var(--outline-variant)',
@@ -446,14 +571,21 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                   fontSize: 14,
                   color: 'var(--on-surface-variant)',
                   transition: 'background-color 0.15s ease',
+                  opacity: isSaving || isDeleting ? 0.5 : 1,
+                  cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-container-high)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                onMouseEnter={(e) => {
+                  if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSaving && !isDeleting) e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={() => onSave && onSave(taskId, { status, priority, description })}
+                disabled={isSaving || isDeleting}
                 style={{
                   padding: 'var(--space-sm) var(--space-lg)',
                   backgroundColor: 'var(--primary)',
@@ -463,11 +595,24 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                   fontSize: 14,
                   boxShadow: '0 4px 10px rgba(9, 20, 38, 0.2)',
                   transition: 'transform 0.1s ease',
+                  opacity: isSaving || isDeleting ? 0.7 : 1,
+                  cursor: isSaving || isDeleting ? 'not-allowed' : 'pointer',
                 }}
-                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
-                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                onMouseDown={(e) => {
+                  if (!isSaving && !isDeleting) e.currentTarget.style.transform = 'scale(0.98)';
+                }}
+                onMouseUp={(e) => {
+                  if (!isSaving && !isDeleting) e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
-                Save Changes
+                {isSaving ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <span className="spinner"></span>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
             </div>
           </footer>
@@ -500,7 +645,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
                     fontSize: 11,
                   }}
                 >
-                  In Progress
+                  {task?.status || 'In Progress'}
                 </span>
               </div>
             </div>
@@ -512,7 +657,7 @@ export default function TaskDetailModal({ taskId, onClose, onSave, onDelete }) {
               <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 'var(--space-xs)' }}>Today, 09:12 AM</div>
               <div className="text-body-md" style={{ color: 'var(--on-surface)' }}>
                 <span style={{ fontWeight: 700 }}>David Chen</span> changed priority to{' '}
-                <span style={{ color: 'var(--error)', fontWeight: 700 }}>High</span>
+                <span style={{ color: 'var(--error)', fontWeight: 700 }}>{task?.priority || 'Medium'}</span>
               </div>
             </div>
 

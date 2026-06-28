@@ -5,7 +5,8 @@ import {
   fetchProjectAndTasks,
   createTaskThunk,
   updateTaskThunk,
-  deleteTaskThunk
+  deleteTaskThunk,
+  clearTasksError
 } from '../store/slices/tasksSlice';
 import TaskCard from '../components/TaskCard';
 import TaskDetailModal from '../components/TaskDetailModal';
@@ -16,7 +17,17 @@ export default function ProjectView() {
   const dispatch = useDispatch();
 
   const { token } = useSelector((state) => state.auth);
-  const { items: tasks, project, loading } = useSelector((state) => state.tasks);
+  const {
+    items: tasks,
+    project,
+    loading,
+    creatingTask,
+    updatingTask,
+    deletingTask,
+    createError,
+    updateError,
+    deleteError
+  } = useSelector((state) => state.tasks);
   
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [createTaskCol, setCreateTaskCol] = useState(null); // holds col name, e.g. 'To Do'
@@ -35,6 +46,7 @@ export default function ProjectView() {
 
   const handleCloseModal = () => {
     setSelectedTaskId(null);
+    dispatch(clearTasksError());
   };
 
   const handleSaveTask = async (taskId, updatedData) => {
@@ -96,6 +108,7 @@ export default function ProjectView() {
 
   const handleCloseAddTaskModal = () => {
     setCreateTaskCol(null);
+    dispatch(clearTasksError());
   };
 
   const handleCreateTask = async (taskData) => {
@@ -120,8 +133,80 @@ export default function ProjectView() {
 
   if (loading && !project) {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
-        <p>Loading project boards from MongoDB...</p>
+      <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 112px)', gap: 'var(--space-lg)', animation: 'fade-in 0.4s ease-out' }}>
+        {/* Header Skeleton */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', width: '45%' }}>
+            <div className="skeleton" style={{ width: 120, height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+            <div className="skeleton" style={{ width: '80%', height: 32, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-lg)', marginTop: 8 }} />
+            <div className="skeleton" style={{ width: '100%', height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)', marginTop: 4 }} />
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+            <div className="skeleton" style={{ width: 100, height: 36, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-lg)' }} />
+            <div className="skeleton" style={{ width: 80, height: 36, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-lg)' }} />
+          </div>
+        </div>
+
+        {/* Board Columns Skeletons */}
+        <div
+          style={{
+            flex: 1,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 'var(--space-lg)',
+            overflow: 'hidden',
+          }}
+        >
+          {['To Do', 'In Progress', 'Completed'].map((colName, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                backgroundColor: 'rgba(240, 237, 239, 0.5)',
+                borderRadius: 'var(--radius-lg)',
+                padding: 'var(--space-md)',
+                gap: 'var(--space-md)',
+              }}
+            >
+              {/* Column Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="skeleton" style={{ width: 80, height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+                <div className="skeleton" style={{ width: 24, height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+              </div>
+
+              {/* Cards List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                {[1, 2].map((cardIdx) => (
+                  <div
+                    key={cardIdx}
+                    style={{
+                      backgroundColor: 'var(--surface-container-lowest)',
+                      border: '1px solid var(--outline-variant)',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: 'var(--space-md)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--space-sm)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div className="skeleton" style={{ width: 60, height: 14, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                      <div className="skeleton" style={{ width: 20, height: 14, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                    </div>
+                    <div className="skeleton" style={{ width: '80%', height: 18, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                    <div className="skeleton" style={{ width: '100%', height: 28, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                      <div className="skeleton" style={{ width: 50, height: 14, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                      <div className="skeleton" style={{ width: 24, height: 24, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -388,6 +473,10 @@ export default function ProjectView() {
           onClose={handleCloseModal}
           onSave={handleSaveTask}
           onDelete={handleDeleteTask}
+          isSaving={updatingTask}
+          isDeleting={deletingTask}
+          saveError={updateError}
+          deleteError={deleteError}
         />
       )}
 
@@ -397,6 +486,8 @@ export default function ProjectView() {
           columnStatus={createTaskCol}
           onClose={handleCloseAddTaskModal}
           onCreate={handleCreateTask}
+          isCreating={creatingTask}
+          error={createError}
         />
       )}
     </div>

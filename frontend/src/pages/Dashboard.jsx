@@ -240,9 +240,38 @@ export default function Dashboard() {
         {/* Bento Grid */}
         <div className="bento-grid">
           {loading ? (
-            <div style={{ padding: '40px 0', textAlign: 'center', gridColumn: 'span 12' }}>
-              <p>Loading projects from MongoDB...</p>
-            </div>
+            <>
+              {[0, 1, 2].map((idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    ...getCardStyle(idx),
+                    backgroundColor: 'var(--surface-container-lowest)',
+                    border: '1px solid var(--outline-variant)',
+                    borderRadius: 'var(--radius-xl)',
+                    padding: 'var(--space-lg)',
+                    minHeight: 220,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                    <div className="skeleton" style={{ width: 80, height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+                    <div className="skeleton" style={{ width: '60%', height: 24, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-lg)', marginTop: 8 }} />
+                    <div className="skeleton" style={{ width: '90%', height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)', marginTop: 4 }} />
+                    <div className="skeleton" style={{ width: '40%', height: 16, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div className="skeleton" style={{ width: 100, height: 12, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                      <div className="skeleton" style={{ width: 30, height: 12, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius)' }} />
+                    </div>
+                    <div className="skeleton" style={{ width: '100%', height: 8, backgroundColor: 'var(--surface-container-high)', borderRadius: 'var(--radius-full)' }} />
+                  </div>
+                </div>
+              ))}
+            </>
           ) : (
             projects.map((project, idx) => {
               return (
