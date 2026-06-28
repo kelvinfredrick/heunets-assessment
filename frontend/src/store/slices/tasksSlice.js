@@ -158,6 +158,8 @@ const tasksSlice = createSlice({
       .addCase(fetchProjectAndTasks.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.project = null;
+        state.items = [];
       })
       .addCase(fetchProjectAndTasks.fulfilled, (state, action) => {
         state.loading = false;

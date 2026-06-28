@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
 import ProjectView from './pages/ProjectView';
 import Tasks from './pages/Tasks';
 import Calendar from './pages/Calendar';
@@ -43,7 +44,7 @@ function MainRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="projects" element={<Navigate to="/projects/website-redesign" replace />} />
+        <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectView />} />
         <Route path="tasks" element={<Tasks />} />
         <Route path="calendar" element={<Calendar />} />
