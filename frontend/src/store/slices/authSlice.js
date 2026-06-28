@@ -71,6 +71,7 @@ const initialState = {
     const stored = localStorage.getItem('teamboard_user');
     return stored ? JSON.parse(stored) : null;
   })(),
+  token: localStorage.getItem('teamboard_token') || null,
   loading: false,
   error: null,
 };
@@ -81,8 +82,10 @@ const authSlice = createSlice({
   reducers: {
     logoutUser: (state) => {
       state.user = null;
+      state.token = null;
       state.error = null;
       localStorage.removeItem('teamboard_user');
+      localStorage.removeItem('teamboard_token');
     },
     clearAuthError: (state) => {
       state.error = null;
@@ -98,7 +101,9 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        state.token = action.payload.token;
         localStorage.setItem('teamboard_user', JSON.stringify(action.payload.user));
+        localStorage.setItem('teamboard_token', action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -112,7 +117,9 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        state.token = action.payload.token;
         localStorage.setItem('teamboard_user', JSON.stringify(action.payload.user));
+        localStorage.setItem('teamboard_token', action.payload.token);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -121,14 +128,18 @@ const authSlice = createSlice({
       // Logout Thunk
       .addCase(logoutUserThunk.fulfilled, (state) => {
         state.user = null;
+        state.token = null;
         state.error = null;
         localStorage.removeItem('teamboard_user');
+        localStorage.removeItem('teamboard_token');
       })
       .addCase(logoutUserThunk.rejected, (state) => {
         // Force state cleanup even if network request fails
         state.user = null;
+        state.token = null;
         state.error = null;
         localStorage.removeItem('teamboard_user');
+        localStorage.removeItem('teamboard_token');
       });
   },
 });

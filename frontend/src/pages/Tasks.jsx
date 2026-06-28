@@ -8,7 +8,7 @@ import TaskDetailModal from '../components/TaskDetailModal';
 
 export default function Tasks() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const { list: projects } = useSelector((state) => state.projects);
   const {
     updatingTask,
@@ -28,7 +28,7 @@ export default function Tasks() {
 
   const loadAllTasks = () => {
     setLoading(true);
-    api.getTasks()
+    api.getTasks(token)
       .then((taskList) => {
         setTasks(taskList || []);
         setLoading(false);
@@ -44,7 +44,7 @@ export default function Tasks() {
       dispatch(fetchProjects());
       loadAllTasks();
     }
-  }, [user, dispatch]);
+  }, [user, token, dispatch]);
 
   const handleTaskClick = (taskId) => {
     setSelectedTaskId(taskId);

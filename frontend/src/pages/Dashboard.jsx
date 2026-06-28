@@ -9,7 +9,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const { list: projects, loading } = useSelector((state) => state.projects);
   const [tasks, setTasks] = useState([]);
   const [tasksLoading, setTasksLoading] = useState(true);
@@ -18,7 +18,7 @@ export default function Dashboard() {
     if (user) {
       dispatch(fetchProjects());
       setTasksLoading(true);
-      api.getTasks()
+      api.getTasks(token)
         .then((taskList) => {
           setTasks(taskList || []);
           setTasksLoading(false);
@@ -28,7 +28,7 @@ export default function Dashboard() {
           setTasksLoading(false);
         });
     }
-  }, [user, dispatch]);
+  }, [user, token, dispatch]);
 
   const handleProjectClick = (projectId) => {
     navigate(`/projects/${projectId}`);

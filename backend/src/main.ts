@@ -14,7 +14,9 @@ async function bootstrap() {
       if (!requestOrigin) return callback(null, true);
       const isAllowed = 
         requestOrigin === 'https://heunets-assessment.vercel.app' ||
-        requestOrigin.endsWith('.vercel.app');
+        requestOrigin.endsWith('.vercel.app') ||
+        requestOrigin.startsWith('http://localhost:') ||
+        requestOrigin === 'http://localhost';
       if (isAllowed) {
         callback(null, true);
       } else {

@@ -15,13 +15,17 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const result = await this.authService.register(registerDto);
-    res.cookie('teamboard_token', result.token, {
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions: express.CookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+    };
+    res.cookie('teamboard_token', result.token, {
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return { user: result.user };
+    return { user: result.user, token: result.token };
   }
 
   @Post('login')
@@ -31,23 +35,29 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const result = await this.authService.login(loginDto);
-    res.cookie('teamboard_token', result.token, {
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions: express.CookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+    };
+    res.cookie('teamboard_token', result.token, {
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    return { user: result.user };
+    return { user: result.user, token: result.token };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Res({ passthrough: true }) res: express.Response) {
-    res.clearCookie('teamboard_token', {
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions: express.CookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+    };
+    res.clearCookie('teamboard_token', cookieOptions);
     return { message: 'Logged out successfully' };
   }
 
