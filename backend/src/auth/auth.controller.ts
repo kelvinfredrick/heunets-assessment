@@ -17,8 +17,8 @@ export class AuthController {
     const result = await this.authService.register(registerDto);
     res.cookie('teamboard_token', result.token, {
       httpOnly: true,
-      secure: false, // set to true in production if using HTTPS
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
     });
     return { user: result.user };
@@ -33,8 +33,8 @@ export class AuthController {
     const result = await this.authService.login(loginDto);
     res.cookie('teamboard_token', result.token, {
       httpOnly: true,
-      secure: false, // set to true in production if using HTTPS
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
     });
     return { user: result.user };
@@ -45,8 +45,8 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: express.Response) {
     res.clearCookie('teamboard_token', {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
     });
     return { message: 'Logged out successfully' };
   }

@@ -272,6 +272,29 @@ export default function Dashboard() {
                 </div>
               ))}
             </>
+          ) : projects.length === 0 ? (
+            <div
+              style={{
+                gridColumn: 'span 12',
+                backgroundColor: 'var(--surface-container-lowest)',
+                border: '2px dashed var(--outline-variant)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'var(--space-xl)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 300,
+                color: 'var(--on-surface-variant)',
+                textAlign: 'center',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 48, marginBottom: 'var(--space-sm)' }}>
+                folder
+              </span>
+              <p className="text-body-md" style={{ fontWeight: 600 }}>No projects found</p>
+              <p className="text-label-sm">Create a new project from the sidebar to get started!</p>
+            </div>
           ) : (
             projects.map((project, idx) => {
               return (

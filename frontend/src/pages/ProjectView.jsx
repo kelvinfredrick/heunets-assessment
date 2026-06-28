@@ -434,9 +434,34 @@ export default function ProjectView() {
                 }}
                 className="scrollbar-hide"
               >
-                {colTasks.map((task) => (
-                  <TaskCard key={task._id} task={{ ...task, id: task._id }} onClick={handleTaskClick} />
-                ))}
+                {colTasks.length === 0 ? (
+                  <div
+                    style={{
+                      padding: 'var(--space-lg) var(--space-md)',
+                      border: '1px dashed var(--outline-variant)',
+                      borderRadius: 'var(--radius-lg)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--on-surface-variant)',
+                      opacity: 0.6,
+                      fontSize: 12,
+                      gap: 4,
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      margin: 'var(--space-sm) 0',
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                      inbox
+                    </span>
+                    <span>No tasks in {colName}</span>
+                  </div>
+                ) : (
+                  colTasks.map((task) => (
+                    <TaskCard key={task._id} task={{ ...task, id: task._id }} onClick={handleTaskClick} />
+                  ))
+                )}
 
                 <button
                   onClick={() => handleOpenAddTaskModal(colName)}
