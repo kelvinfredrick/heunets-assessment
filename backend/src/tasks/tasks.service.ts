@@ -24,9 +24,19 @@ export class TasksService {
     return savedTask;
   }
 
-  async findAll(projectId: string): Promise<Task[]> {
+  async findAll(projectId: string | undefined, userId: string): Promise<Task[]> {
+    if (projectId && projectId !== 'undefined' && projectId !== 'null' && projectId.trim() !== '') {
+      return this.taskModel
+        .find({ project: new Types.ObjectId(projectId) })
+        .populate('assignee', 'name email avatar')
+        .exec();
+    }
+
+    const projects = await this.projectsService.findAll(userId);
+    const projectIds = projects.map((p) => p._id);
+
     return this.taskModel
-      .find({ project: new Types.ObjectId(projectId) })
+      .find({ project: { $in: projectIds } })
       .populate('assignee', 'name email avatar')
       .exec();
   }

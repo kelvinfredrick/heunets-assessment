@@ -1,21 +1,34 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjects } from '../store/slices/projectsSlice';
 import StatusChip from '../components/StatusChip';
+import { api } from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const { user, token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const { list: projects, loading } = useSelector((state) => state.projects);
+  const [tasks, setTasks] = useState([]);
+  const [tasksLoading, setTasksLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
+    if (user) {
       dispatch(fetchProjects());
+      setTasksLoading(true);
+      api.getTasks()
+        .then((taskList) => {
+          setTasks(taskList || []);
+          setTasksLoading(false);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch tasks for dashboard stats:', err);
+          setTasksLoading(false);
+        });
     }
-  }, [token, dispatch]);
+  }, [user, dispatch]);
 
   const handleProjectClick = (projectId) => {
     navigate(`/projects/${projectId}`);
@@ -67,7 +80,7 @@ export default function Dashboard() {
               Tasks Completed
             </p>
             <h3 className="text-display" style={{ lineHeight: 1, color: 'var(--primary)' }}>
-              128
+              {tasksLoading ? '...' : tasks.filter(t => t.status === 'Completed').length}
             </h3>
             <p
               className="text-label-sm"
@@ -81,7 +94,7 @@ export default function Dashboard() {
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>trending_up</span>
-              +12% from last week
+              {tasksLoading ? '...' : `${tasks.length} total tasks in workspace`}
             </p>
           </div>
           <div
@@ -132,7 +145,7 @@ export default function Dashboard() {
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>sync</span>
-              Syncing via Redux Toolkit
+              {projects.filter(p => p.progress === 100).length} completed projects
             </p>
           </div>
           <div
@@ -169,7 +182,7 @@ export default function Dashboard() {
               Upcoming Deadlines
             </p>
             <h3 className="text-display" style={{ lineHeight: 1, color: 'var(--error)' }}>
-              3
+              {tasksLoading ? '...' : tasks.filter(t => t.priority === 'High' && t.status !== 'Completed').length}
             </h3>
             <p
               className="text-label-sm"
@@ -183,7 +196,7 @@ export default function Dashboard() {
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>schedule</span>
-              Priority: High
+              High priority tasks remaining
             </p>
           </div>
           <div

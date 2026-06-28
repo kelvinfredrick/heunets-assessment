@@ -16,7 +16,7 @@ export default function ProjectView() {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const {
     items: tasks,
     project,
@@ -35,10 +35,10 @@ export default function ProjectView() {
   const [priorityFilter, setPriorityFilter] = useState('All');
 
   useEffect(() => {
-    if (token && id) {
+    if (user && id) {
       dispatch(fetchProjectAndTasks(id));
     }
-  }, [id, token, dispatch]);
+  }, [id, user, dispatch]);
 
   const handleTaskClick = (taskId) => {
     setSelectedTaskId(taskId);
